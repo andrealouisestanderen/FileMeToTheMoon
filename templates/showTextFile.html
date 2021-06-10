@@ -105,7 +105,7 @@
     <script>
         function setWords() {
             unique_words = '{{ words }}'
-            var clean_unique_words = unique_words.replaceAll('&#39;', '').replaceAll('&#34;', '').replaceAll('.', '').replace('odict_keys([', '').replace(']', '').split(', ');
+            var clean_unique_words = unique_words.replaceAll('&#39;', '').replaceAll('&#34;', '').replaceAll('.', '').replace('odict_keys([', '').replace('[', '').replace(']', '').split(', ');
             console.log(clean_unique_words)
             var dropdown = document.getElementById("selectWord");
             clean_unique_words.map((key, index) => {
@@ -127,7 +127,7 @@
             var index = wordlist.options[wordlist.selectedIndex].value;
 
             values = '{{ values }}'
-            var clean_values = values.replaceAll('&#39;', '').replaceAll('&#34;', '').replaceAll('.', '').replace('odict_values([', '').replace(']', '').split(', ');
+            var clean_values = values.replaceAll('&#39;', '').replaceAll('&#34;', '').replaceAll('.', '').replace('odict_values([', '').replace('[', '').replace(']', '').split(', ');
             var value = clean_values[index]
 
             document.getElementById("wordcount").innerHTML = value;

@@ -25,7 +25,7 @@
         File Me To The Moon
     </h1>
     <div style=" text-align: center;">
-        <form method=post enctype=multipart/form-data>
+        <form method=post enctype=multipart/form-data action="/">
             <label style=" display:inline-block; 
             width: 196px; 
             height: 66px;
@@ -59,6 +59,10 @@
             opacity: 0.99;">
                 No file chosen
             </div>
+            <div id="py_seq_radio" style="color: #05445E; position: relative; top: 235px; visibility: hidden;">
+                <input type="radio" name="method" value="pyspark">PySpark
+                <input type="radio" name="method" value="seqpyt">Sequential Python
+            </div>
             <div>
                 <input style="width: 200px;
                 height: 70px;
@@ -78,7 +82,14 @@
 </body>
 <script>
     document.getElementById('file').onchange = function() {
-        document.getElementById('filename').innerHTML = 'Selected file: ' + this.value;
+        var file = this.value;
+        document.getElementById('filename').innerHTML = 'Selected file: ' + file;
+        var filetype = file.substring(file.length - 3, file.length);
+        if (filetype === 'txt') {
+            document.getElementById('py_seq_radio').style.visibility = 'visible';
+        } else {
+            document.getElementById('py_seq_radio').style.visibility = 'hidden';
+        }
     };
 </script>
 

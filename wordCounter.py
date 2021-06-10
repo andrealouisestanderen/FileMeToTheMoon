@@ -1,3 +1,5 @@
+import collections
+
 
 def countWords(filename):
     unique_words = {}
@@ -15,6 +17,15 @@ def countWords(filename):
             else:
                 unique_words[word] += 1
 
+    unique_words = {key: val for key, val in unique_words.items() if val != 1}
+
+    sorted_dict = sorted(
+        unique_words.items(), key=lambda kv: kv[1], reverse=True)
+
+    sorted_unique_words = collections.OrderedDict(sorted_dict)
+
+    words = sorted_unique_words.keys()
+    values = sorted_unique_words.values()
     total_unique_words = len(unique_words)
 
-    return total_words, total_unique_words, unique_words
+    return total_words, total_unique_words, words, values

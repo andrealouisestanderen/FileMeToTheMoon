@@ -4,11 +4,10 @@ from datetime import datetime
 import os
 import subprocess
 import time
-import uuid
 import operator
-import collections
 
 import wordCounter
+import wordCounterSpark
 
 UPLOAD_FOLDER = './static'
 ALLOWED_EXTENSIONS = set(['png', 'txt'])
@@ -19,14 +18,15 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
-    #tag = uuid.uuid4()
-    #message = json.dumps({"tag":str(tag)})
-    #session['message'] = message
     # Delete older processed images
     for filename in os.listdir('static/'):
-        if filename.startswith('blurry'):  # not to remove other images
+        # not to remove other images
+        if filename.endswith('png') and filename != 'cloud-computing.png':
+            os.remove('static/' + filename)
+        if filename.endswith('txt'):
             os.remove('static/' + filename)
     if request.method == 'POST':
+        method = request.form['method']
         # check if the post request has the file part
         if 'file' not in request.files:
             flash('No file part')
@@ -42,7 +42,7 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
             if filename.rsplit('.', 1)[1].lower() == 'txt':
-                return redirect(url_for('word_counter', filename=filename))
+                return redirect(url_for('word_counter', filename=filename, method=method))
 
             elif filename.rsplit('.', 1)[1].lower() == 'png':
                 return redirect(url_for('processed_file', filename=filename))
@@ -59,26 +59,25 @@ def processed_file(filename):
     return render_template('processed.html', file=newFilename)
 
 
-@app.route('/wordcounter/<filename>')
-def word_counter(filename):
+@app.route('/wordcounter/<filename>/<method>')
+def word_counter(filename, method):
 
-    total_words, total_unique_words, unique_words = wordCounter.countWords(
-        filename)
+    total_words = 0
+    total_unique_words = 0
+    words = []
+    values = []
 
-    unique_words = {key: val for key, val in unique_words.items() if val != 1}
+    if method == 'seqpyt':
+        total_words, total_unique_words, words, values = wordCounter.countWords(
+            filename)
 
-    sorted_dict = sorted(
-        unique_words.items(), key=lambda kv: kv[1], reverse=True)
+    elif method == 'pyspark':
+        total_words, total_unique_words, words, values = wordCounterSpark.countWordsSpark(
+            filename)
 
-    sorted_unique_words = collections.OrderedDict(sorted_dict)
-
-    words = sorted_unique_words.keys()
-    values = sorted_unique_words.values()
-
-    print(list(words)[0])
-    print(list(values)[0])
-
-    return render_template('showTextFile.html', tot_w=total_words, tot_u_w=total_unique_words, words=words, values=values, file=filename)
+    return render_template('showTextFile.html',
+                           tot_w=total_words, tot_u_w=total_unique_words,
+                           words=words, values=values, file=filename)
 
 
 def check_file(filename):
